@@ -1,23 +1,56 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const morgan = require("morgan");
+const session = require("express-session");
+const passport = require("passport");
+require("dotenv").config();
+
+require("./config/passport");
+
+const authRoutes = require("./modules/auth/auth.routes");
 
 const app = express();
 
-app.use(cors({
+// 1. CORS FIRST
+app.use(
+  cors({
     origin: "http://localhost:5173",
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 
+// 2. BODY PARSING
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 3. COOKIE PARSER
 app.use(cookieParser());
-app.use(morgan("dev"));
+
+// 4. SESSION (must come before passport.session)
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);
+
+// 5. PASSPORT (IMPORTANT ORDER)
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ROUTES
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
-    res.json({
-        message: "API running..."
-    });
+  res.json({ message: "API running" });
 });
+
+app.use("/api/profile", require("./routes/profile.routes"));
 
 module.exports = app;
