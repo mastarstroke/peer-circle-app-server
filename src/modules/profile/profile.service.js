@@ -1,4 +1,5 @@
 const profileRepository = require("./profile.repository");
+const logsService = require("../logs/logs.service");
 
 exports.getProfile = async (userId) => {
   const user =
@@ -28,5 +29,11 @@ exports.updateProfile = async (userId, payload) => {
       }
     );
 
+    await logsService.logActivity({
+      userId,
+      action: "Updated profile",
+      details: `User updated their profile with new details: ${JSON.stringify(payload)}`,
+    });
+    
   return updatedUser;
 };

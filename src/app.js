@@ -23,6 +23,10 @@ const usersRoutes = require(
   "./modules/users/users.routes"
 );
 
+const logsRoutes = require(
+  "./modules/logs/logs.routes"
+);
+
 // 1. CORS FIRST
 app.use(
   cors({
@@ -63,6 +67,7 @@ app.use("/api/users", usersRoutes);
 
 app.use("/api/relationships", relationshipRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/logs", logsRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API running" });

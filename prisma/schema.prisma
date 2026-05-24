@@ -29,6 +29,8 @@ model User {
 
   followers   Follow[] @relation("followers")
   following   Follow[] @relation("following")
+
+  activityLogs ActivityLog[]
 }
 
 model Follow {
@@ -43,4 +45,15 @@ model Follow {
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
 }
