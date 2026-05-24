@@ -44,6 +44,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.use("/api/relationships", require("./modules/relationships/relationships.routes"));
+app.use("/api/relationships", require("./routes/relationships.routes"));
+app.use("/api/users", require("./routes/users.routes"));
+
 // ROUTES
 app.use("/api/auth", authRoutes);
 
