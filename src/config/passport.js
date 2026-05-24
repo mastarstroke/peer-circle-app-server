@@ -2,7 +2,6 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const prisma = require("./prisma");
 
-console.log("Available models:", Object.keys(prisma));  // quick check
 
 passport.use(
   new GoogleStrategy(
