@@ -1,7 +1,9 @@
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const prisma = require("./prisma");
 
+const passport = require("passport");
+
+const GoogleStrategy =
+  require("passport-google-oauth20").Strategy;
 
 passport.use(
   new GoogleStrategy(
@@ -10,37 +12,67 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/api/auth/google/callback",
     },
+
     async (accessToken, refreshToken, profile, done) => {
       try {
-        if (!profile.id || !profile.emails?.[0]?.value) {
-          return done(new Error("Incomplete profile data from Google"), null);
+        const email = profile.emails?.[0]?.value;
+
+        if (!email) {
+          return done(
+            new Error("No email found from Google"),
+            null
+          );
         }
 
         let user = await prisma.user.findUnique({
-          where: { providerId: profile.id },
+          where: {
+            email,
+          },
         });
 
         if (!user) {
           user = await prisma.user.create({
             data: {
-              email: profile.emails[0].value,
-              fullName: profile.displayName || "Anonymous",
-              avatar: profile.photos?.[0]?.value || null,
+              email,
+              fullName:
+                profile.displayName || "Anonymous",
+              avatar:
+                profile.photos?.[0]?.value || null,
+
               provider: "google",
               providerId: profile.id,
             },
           });
         }
 
+        else if (!user.providerId) {
+          user = await prisma.user.update({
+            where: {
+              email,
+            },
+
+            data: {
+              provider: "google",
+              providerId: profile.id,
+              avatar:
+                profile.photos?.[0]?.value ||
+                user.avatar,
+            },
+          });
+        }
+
         return done(null, user);
       } catch (err) {
-        console.error("Google Strategy Error:", err);
+        console.error(
+          "Google Strategy Error:",
+          err
+        );
+
         return done(err, null);
       }
     }
   )
 );
-
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -49,7 +81,9 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
     });
 
     done(null, user);
@@ -57,3 +91,5 @@ passport.deserializeUser(async (id, done) => {
     done(err, null);
   }
 });
+
+module.exports = passport;

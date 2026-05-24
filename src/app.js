@@ -11,6 +11,18 @@ const authRoutes = require("./modules/auth/auth.routes");
 
 const app = express();
 
+const relationshipRoutes = require(
+  "./modules/relationships/relationships.routes"
+);
+
+const profileRoutes = require(
+  "./modules/profile/profile.routes"
+);
+
+const usersRoutes = require(
+  "./modules/users/users.routes"
+);
+
 // 1. CORS FIRST
 app.use(
   cors({
@@ -26,7 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 // 3. COOKIE PARSER
 app.use(cookieParser());
 
-// 4. SESSION (must come before passport.session)
+// 4. SESSION 
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -40,21 +52,20 @@ app.use(
   })
 );
 
-// 5. PASSPORT (IMPORTANT ORDER)
+// 5. PASSPORT
 app.use(passport.initialize());
 app.use(passport.session());
-
-// app.use("/api/relationships", require("./modules/relationships/relationships.routes"));
-app.use("/api/relationships", require("./routes/relationships.routes"));
-app.use("/api/users", require("./routes/users.routes"));
 
 // ROUTES
 app.use("/api/auth", authRoutes);
 
+app.use("/api/users", usersRoutes);
+
+app.use("/api/relationships", relationshipRoutes);
+app.use("/api/profile", profileRoutes);
+
 app.get("/", (req, res) => {
   res.json({ message: "API running" });
 });
-
-app.use("/api/profile", require("./routes/profile.routes"));
 
 module.exports = app;
