@@ -22,7 +22,7 @@ model User {
   linkedin    String?
 
   provider    String?
-  providerId  String?   @unique   // 👈 IMPORTANT FIX
+  providerId  String?   @unique
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
