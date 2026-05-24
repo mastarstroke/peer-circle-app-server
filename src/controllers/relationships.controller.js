@@ -4,26 +4,42 @@ const prisma = require("../config/prisma");
 exports.followUser = async (req, res) => {
   try {
     const followerId = req.user.id;
-    const { followingId } = req.body;
+    const { userId } = req.body;
 
-    if (!followingId) {
-      return res.status(400).json({ message: "followingId is required" });
+    if (followerId === userId) {
+      return res.status(400).json({
+        message: "You cannot follow yourself",
+      });
     }
 
-    if (followerId === followingId) {
-      return res.status(400).json({ message: "You cannot follow yourself" });
+    const existing = await prisma.follow.findFirst({
+      where: {
+        followerId,
+        followingId: userId,
+      },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Already following this user",
+      });
     }
 
     await prisma.follow.create({
       data: {
         followerId,
-        followingId,
+        followingId: userId,
       },
     });
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      message: "User followed",
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
@@ -32,18 +48,23 @@ exports.followUser = async (req, res) => {
 exports.unfollowUser = async (req, res) => {
   try {
     const followerId = req.user.id;
-    const { followingId } = req.body;
+    const { userId } = req.body;
 
     await prisma.follow.deleteMany({
       where: {
         followerId,
-        followingId,
+        followingId: userId,
       },
     });
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      message: "User unfollowed",
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
