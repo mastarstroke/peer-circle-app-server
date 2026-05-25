@@ -32,7 +32,7 @@ exports.updateProfile = async (userId, payload) => {
     await logsService.logActivity({
       userId,
       action: "Updated profile",
-      details: `User updated their profile with new details: ${JSON.stringify(payload)}`,
+      details: `User updated their profile`,
     });
     
   return updatedUser;
